@@ -7,7 +7,6 @@ import {
   FlatList,
   KeyboardAvoidingView,
   Platform,
-  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -198,20 +197,6 @@ export default function ChatScreen() {
 
   const chatMessages = messages[chatId] || [];
 
-  // On Android, KeyboardAvoidingView is unreliable.
-  // The correct solution is to set windowSoftInputMode="adjustResize" in
-  // AndroidManifest.xml AND use behavior="padding" here.
-  // If using Expo, set this in app.json:
-  //   "android": { "softwareKeyboardLayoutMode": "pan" }  ← fallback
-  // OR (recommended): use expo-navigation-bar or the manifest approach below.
-  //
-  // RECOMMENDED: In android/app/src/main/AndroidManifest.xml set:
-  //   android:windowSoftInputMode="adjustResize"
-  // on your MainActivity <activity> tag.
-  //
-  // With adjustResize, the entire layout shrinks when keyboard opens,
-  // so KeyboardAvoidingView with behavior="padding" works perfectly.
-
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <Stack.Screen
@@ -225,24 +210,10 @@ export default function ChatScreen() {
         }}
       />
 
-      {/*
-        CROSS-PLATFORM KEYBOARD FIX:
-        - behavior="padding" works on BOTH iOS and Android when
-          windowSoftInputMode="adjustResize" is set in AndroidManifest.
-        - keyboardVerticalOffset: on iOS we need header height + status bar.
-          56 covers most Expo Router header heights. Increase to 90 if your
-          header is taller (e.g., with a subtitle or custom header).
-        - On Android with adjustResize, the OS already resizes the window,
-          so KAV with padding adds a small extra push — this is fine.
-      */}
       <KeyboardAvoidingView
         style={styles.flex}
-        behavior="padding"
-        keyboardVerticalOffset={
-          Platform.OS === 'ios'
-            ? 56 + (StatusBar.currentHeight ?? 0)
-            : 0  // Android: adjustResize handles it; offset = 0
-        }
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
       >
         <FlatList
           ref={flatListRef}
